@@ -31,4 +31,9 @@ public class DocumentController {
     ) {
         return documentService.createDocument(request);
     }
+
+    @GetMapping("/{id}")
+    public DocumentResponse getDocumentById(@PathVariable Long id) {
+        return documentService.getDocumentById(id);
+    }
 }
