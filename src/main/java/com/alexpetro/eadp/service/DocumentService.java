@@ -8,11 +8,20 @@ import org.springframework.stereotype.Service;
 import com.alexpetro.eadp.exception.DocumentNotFoundException;
 import com.alexpetro.eadp.dto.DocumentUpdateRequest;
 import org.springframework.web.multipart.MultipartFile;
+import com.alexpetro.eadp.exception.InvalidFileException;
+import java.util.Set;
 
 import java.util.List;
 
 @Service
 public class DocumentService {
+
+    private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
+            "application/pdf",
+            "text/plain",
+            "image/jpeg",
+            "image/png"
+    );
 
     private final DocumentRepository documentRepository;
 
@@ -78,6 +87,19 @@ public class DocumentService {
     }
 
     public DocumentResponse uploadDocument(MultipartFile file) {
+
+        if (file.isEmpty()) {
+            throw new InvalidFileException(
+                    "Uploaded file must not be empty"
+            );
+        }
+
+        if (!ALLOWED_CONTENT_TYPES.contains(file.getContentType())) {
+            throw new InvalidFileException(
+                    "Unsupported file type: " + file.getContentType()
+            );
+        }
+
         Document document = new Document();
 
         document.setFilename(file.getOriginalFilename());
