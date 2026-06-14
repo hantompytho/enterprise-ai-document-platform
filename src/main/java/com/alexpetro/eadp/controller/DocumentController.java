@@ -1,7 +1,9 @@
 package com.alexpetro.eadp.controller;
 
-import com.alexpetro.eadp.entity.Document;
+import com.alexpetro.eadp.dto.DocumentCreateRequest;
+import com.alexpetro.eadp.dto.DocumentResponse;
 import com.alexpetro.eadp.service.DocumentService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,13 +18,17 @@ public class DocumentController {
         this.documentService = documentService;
     }
 
+
     @GetMapping
-    public List<Document> getAllDocuments() {
+    public List<DocumentResponse> getAllDocuments() {
         return documentService.getAllDocuments();
     }
 
+
     @PostMapping
-    public Document createDocument(@RequestBody Document document) {
-        return documentService.createDocument(document);
+    public DocumentResponse createDocument(
+            @Valid @RequestBody DocumentCreateRequest request
+    ) {
+        return documentService.createDocument(request);
     }
 }

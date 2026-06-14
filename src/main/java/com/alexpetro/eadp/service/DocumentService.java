@@ -1,5 +1,7 @@
 package com.alexpetro.eadp.service;
 
+import com.alexpetro.eadp.dto.DocumentCreateRequest;
+import com.alexpetro.eadp.dto.DocumentResponse;
 import com.alexpetro.eadp.entity.Document;
 import com.alexpetro.eadp.repository.DocumentRepository;
 import org.springframework.stereotype.Service;
@@ -15,11 +17,33 @@ public class DocumentService {
         this.documentRepository = documentRepository;
     }
 
-    public List<Document> getAllDocuments() {
-        return documentRepository.findAll();
+    public List<DocumentResponse> getAllDocuments() {
+        return documentRepository.findAll()
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
     }
 
-    public Document createDocument(Document document) {
-        return documentRepository.save(document);
+    public DocumentResponse createDocument(DocumentCreateRequest request) {
+
+        Document document = new Document();
+
+        document.setFilename(request.getFilename());
+        document.setContentType(request.getContentType());
+        document.setSummary(request.getSummary());
+
+        Document savedDocument = documentRepository.save(document);
+
+        return mapToResponse(savedDocument);
+    }
+
+    private DocumentResponse mapToResponse(Document document) {
+        return new DocumentResponse(
+                document.getId(),
+                document.getFilename(),
+                document.getContentType(),
+                document.getSummary(),
+                document.getCreatedAt()
+        );
     }
 }
