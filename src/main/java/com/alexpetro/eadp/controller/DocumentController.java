@@ -45,4 +45,9 @@ public class DocumentController {
     ) {
         return documentService.updateDocument(id, request);
     }
+
+    @DeleteMapping("/{id}")
+    public void deleteDocument(@PathVariable Long id) {
+        documentService.deleteDocument(id);
+    }
 }

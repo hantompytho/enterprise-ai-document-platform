@@ -68,4 +68,11 @@ public class DocumentService {
 
         return mapToResponse(updatedDocument);
     }
+
+    public void deleteDocument(Long id) {
+        Document document = documentRepository.findById(id)
+                .orElseThrow(() -> new DocumentNotFoundException(id));
+
+        documentRepository.delete(document);
+    }
 }
