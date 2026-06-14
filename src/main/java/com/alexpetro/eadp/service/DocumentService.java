@@ -6,6 +6,7 @@ import com.alexpetro.eadp.entity.Document;
 import com.alexpetro.eadp.repository.DocumentRepository;
 import org.springframework.stereotype.Service;
 import com.alexpetro.eadp.exception.DocumentNotFoundException;
+import com.alexpetro.eadp.dto.DocumentUpdateRequest;
 
 import java.util.List;
 
@@ -53,5 +54,18 @@ public class DocumentService {
                 .orElseThrow(() -> new DocumentNotFoundException(id));
 
         return mapToResponse(document);
+    }
+
+    public DocumentResponse updateDocument(Long id, DocumentUpdateRequest request) {
+        Document document = documentRepository.findById(id)
+                .orElseThrow(() -> new DocumentNotFoundException(id));
+
+        document.setFilename(request.getFilename());
+        document.setContentType(request.getContentType());
+        document.setSummary(request.getSummary());
+
+        Document updatedDocument = documentRepository.save(document);
+
+        return mapToResponse(updatedDocument);
     }
 }

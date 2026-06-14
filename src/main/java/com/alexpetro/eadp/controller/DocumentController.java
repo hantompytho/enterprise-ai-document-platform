@@ -5,6 +5,7 @@ import com.alexpetro.eadp.dto.DocumentResponse;
 import com.alexpetro.eadp.service.DocumentService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
+import com.alexpetro.eadp.dto.DocumentUpdateRequest;
 
 import java.util.List;
 
@@ -35,5 +36,13 @@ public class DocumentController {
     @GetMapping("/{id}")
     public DocumentResponse getDocumentById(@PathVariable Long id) {
         return documentService.getDocumentById(id);
+    }
+
+    @PutMapping("/{id}")
+    public DocumentResponse updateDocument(
+            @PathVariable Long id,
+            @Valid @RequestBody DocumentUpdateRequest request
+    ) {
+        return documentService.updateDocument(id, request);
     }
 }
