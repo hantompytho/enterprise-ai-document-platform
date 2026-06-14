@@ -7,6 +7,7 @@ import com.alexpetro.eadp.repository.DocumentRepository;
 import org.springframework.stereotype.Service;
 import com.alexpetro.eadp.exception.DocumentNotFoundException;
 import com.alexpetro.eadp.dto.DocumentUpdateRequest;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -74,5 +75,17 @@ public class DocumentService {
                 .orElseThrow(() -> new DocumentNotFoundException(id));
 
         documentRepository.delete(document);
+    }
+
+    public DocumentResponse uploadDocument(MultipartFile file) {
+        Document document = new Document();
+
+        document.setFilename(file.getOriginalFilename());
+        document.setContentType(file.getContentType());
+        document.setSummary("AI summary not generated yet");
+
+        Document savedDocument = documentRepository.save(document);
+
+        return mapToResponse(savedDocument);
     }
 }

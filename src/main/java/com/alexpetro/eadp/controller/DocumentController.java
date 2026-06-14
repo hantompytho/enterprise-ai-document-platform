@@ -6,6 +6,7 @@ import com.alexpetro.eadp.service.DocumentService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import com.alexpetro.eadp.dto.DocumentUpdateRequest;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -49,5 +50,10 @@ public class DocumentController {
     @DeleteMapping("/{id}")
     public void deleteDocument(@PathVariable Long id) {
         documentService.deleteDocument(id);
+    }
+
+    @PostMapping(value = "/upload", consumes = "multipart/form-data")
+    public DocumentResponse uploadDocument(@RequestParam("file") MultipartFile file) {
+        return documentService.uploadDocument(file);
     }
 }
