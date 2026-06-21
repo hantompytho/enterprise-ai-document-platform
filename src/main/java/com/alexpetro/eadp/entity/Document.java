@@ -19,6 +19,7 @@ public class Document {
 
     private String contentType;
 
+    @Column(columnDefinition = "TEXT")
     private String summary;
 
     private LocalDateTime createdAt;

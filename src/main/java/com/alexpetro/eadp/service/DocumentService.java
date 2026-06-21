@@ -2,16 +2,16 @@ package com.alexpetro.eadp.service;
 
 import com.alexpetro.eadp.dto.DocumentCreateRequest;
 import com.alexpetro.eadp.dto.DocumentResponse;
+import com.alexpetro.eadp.dto.DocumentUpdateRequest;
 import com.alexpetro.eadp.entity.Document;
+import com.alexpetro.eadp.exception.DocumentNotFoundException;
+import com.alexpetro.eadp.exception.InvalidFileException;
 import com.alexpetro.eadp.repository.DocumentRepository;
 import org.springframework.stereotype.Service;
-import com.alexpetro.eadp.exception.DocumentNotFoundException;
-import com.alexpetro.eadp.dto.DocumentUpdateRequest;
 import org.springframework.web.multipart.MultipartFile;
-import com.alexpetro.eadp.exception.InvalidFileException;
-import java.util.Set;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class DocumentService {
@@ -23,10 +23,18 @@ public class DocumentService {
             "image/png"
     );
 
+    private final AiSummaryService aiSummaryService;
     private final DocumentRepository documentRepository;
+    private final TextExtractionService textExtractionService;
 
-    public DocumentService(DocumentRepository documentRepository) {
+    public DocumentService(
+            DocumentRepository documentRepository,
+            TextExtractionService textExtractionService,
+            AiSummaryService aiSummaryService
+    ) {
         this.documentRepository = documentRepository;
+        this.textExtractionService = textExtractionService;
+        this.aiSummaryService = aiSummaryService;
     }
 
     public List<DocumentResponse> getAllDocuments() {
@@ -37,7 +45,6 @@ public class DocumentService {
     }
 
     public DocumentResponse createDocument(DocumentCreateRequest request) {
-
         Document document = new Document();
 
         document.setFilename(request.getFilename());
@@ -47,16 +54,6 @@ public class DocumentService {
         Document savedDocument = documentRepository.save(document);
 
         return mapToResponse(savedDocument);
-    }
-
-    private DocumentResponse mapToResponse(Document document) {
-        return new DocumentResponse(
-                document.getId(),
-                document.getFilename(),
-                document.getContentType(),
-                document.getSummary(),
-                document.getCreatedAt()
-        );
     }
 
     public DocumentResponse getDocumentById(Long id) {
@@ -87,27 +84,39 @@ public class DocumentService {
     }
 
     public DocumentResponse uploadDocument(MultipartFile file) {
-
         if (file.isEmpty()) {
-            throw new InvalidFileException(
-                    "Uploaded file must not be empty"
-            );
+            throw new InvalidFileException("Uploaded file must not be empty");
         }
 
         if (!ALLOWED_CONTENT_TYPES.contains(file.getContentType())) {
-            throw new InvalidFileException(
-                    "Unsupported file type: " + file.getContentType()
-            );
+            throw new InvalidFileException("Unsupported file type: " + file.getContentType());
         }
+
+        String extractedText = textExtractionService.extractText(file);
+
+        String preview = extractedText.length() > 300
+                ? extractedText.substring(0, 300)
+                : extractedText;
 
         Document document = new Document();
 
         document.setFilename(file.getOriginalFilename());
         document.setContentType(file.getContentType());
-        document.setSummary("AI summary not generated yet");
+        String summary = aiSummaryService.summarize(extractedText);
+        document.setSummary(summary);
 
         Document savedDocument = documentRepository.save(document);
 
         return mapToResponse(savedDocument);
+    }
+
+    private DocumentResponse mapToResponse(Document document) {
+        return new DocumentResponse(
+                document.getId(),
+                document.getFilename(),
+                document.getContentType(),
+                document.getSummary(),
+                document.getCreatedAt()
+        );
     }
 }
