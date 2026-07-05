@@ -34,6 +34,11 @@ public class DocumentController {
         return documentService.createDocument(request);
     }
 
+    @GetMapping("/search")
+    public List<DocumentResponse> searchDocuments(@RequestParam String query) {
+        return documentService.searchDocuments(query);
+    }
+
     @GetMapping("/{id}")
     public DocumentResponse getDocumentById(@PathVariable Long id) {
         return documentService.getDocumentById(id);

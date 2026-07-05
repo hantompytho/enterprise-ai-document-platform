@@ -119,4 +119,12 @@ public class DocumentService {
                 document.getCreatedAt()
         );
     }
+
+    public List<DocumentResponse> searchDocuments(String query) {
+        return documentRepository
+                .findByFilenameContainingIgnoreCaseOrSummaryContainingIgnoreCase(query, query)
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
 }
