@@ -8,19 +8,33 @@ import com.alexpetro.eadp.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.alexpetro.eadp.exception.EmailAlreadyExistsException;
+import com.alexpetro.eadp.dto.LoginRequest;
+import com.alexpetro.eadp.dto.LoginResponse;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 @Service
 public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final CustomUserDetailsService customUserDetailsService;
+    private final JwtService jwtService;
 
     public AuthService(
             UserRepository userRepository,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            AuthenticationManager authenticationManager,
+            CustomUserDetailsService customUserDetailsService,
+            JwtService jwtService
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.authenticationManager = authenticationManager;
+        this.customUserDetailsService = customUserDetailsService;
+        this.jwtService = jwtService;
     }
 
     public UserResponse register(RegisterRequest request) {
@@ -43,6 +57,44 @@ public class AuthService {
                 savedUser.getEmail(),
                 savedUser.getRole(),
                 savedUser.getCreatedAt()
+        );
+    }
+
+    public LoginResponse login(LoginRequest request) {
+        String normalizedEmail = request.getEmail()
+                .trim()
+                .toLowerCase();
+
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        normalizedEmail,
+                        request.getPassword()
+                )
+        );
+
+        var userDetails =
+                customUserDetailsService.loadUserByUsername(normalizedEmail);
+
+        String token = jwtService.generateToken(userDetails);
+
+        return new LoginResponse(
+                token,
+                "Bearer",
+                3600
+        );
+    }
+
+    public UserResponse getCurrentUser(String email) {
+        User user = userRepository.findByEmailIgnoreCase(email)
+                .orElseThrow(() ->
+                        new UsernameNotFoundException("User not found")
+                );
+
+        return new UserResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getRole(),
+                user.getCreatedAt()
         );
     }
 }
