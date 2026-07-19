@@ -9,6 +9,9 @@ import com.alexpetro.eadp.exception.InvalidFileException;
 import com.alexpetro.eadp.repository.DocumentRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Set;
@@ -42,6 +45,13 @@ public class DocumentService {
                 .stream()
                 .map(this::mapToResponse)
                 .toList();
+    }
+
+    public Page<DocumentResponse> getDocuments(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        return documentRepository.findAll(pageable)
+                .map(this::mapToResponse);
     }
 
     public DocumentResponse createDocument(DocumentCreateRequest request) {

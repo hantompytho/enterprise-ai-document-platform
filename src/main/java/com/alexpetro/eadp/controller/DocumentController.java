@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import com.alexpetro.eadp.dto.DocumentUpdateRequest;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -22,8 +23,11 @@ public class DocumentController {
 
 
     @GetMapping
-    public List<DocumentResponse> getAllDocuments() {
-        return documentService.getAllDocuments();
+    public Page<DocumentResponse> getDocuments(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return documentService.getDocuments(page, size);
     }
 
 
