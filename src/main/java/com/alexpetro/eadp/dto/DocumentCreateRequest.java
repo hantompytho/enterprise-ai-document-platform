@@ -23,4 +23,16 @@ public class DocumentCreateRequest {
     public String getSummary() {
         return summary;
     }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
+
+    public void setSummary(String summary) {
+        this.summary = summary;
+    }
 }
