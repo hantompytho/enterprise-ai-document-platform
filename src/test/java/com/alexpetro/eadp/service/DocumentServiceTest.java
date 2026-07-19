@@ -3,12 +3,17 @@ package com.alexpetro.eadp.service;
 import com.alexpetro.eadp.dto.DocumentCreateRequest;
 import com.alexpetro.eadp.dto.DocumentResponse;
 import com.alexpetro.eadp.entity.Document;
+import com.alexpetro.eadp.entity.Role;
+import com.alexpetro.eadp.entity.User;
 import com.alexpetro.eadp.repository.DocumentRepository;
+import com.alexpetro.eadp.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -22,6 +27,9 @@ class DocumentServiceTest {
     private DocumentRepository documentRepository;
 
     @Mock
+    private UserRepository userRepository;
+
+    @Mock
     private TextExtractionService textExtractionService;
 
     @Mock
@@ -33,40 +41,49 @@ class DocumentServiceTest {
     void setUp() {
         documentService = new DocumentService(
                 documentRepository,
-                textExtractionService,
-                aiSummaryService
+                userRepository,
+                aiSummaryService,
+                textExtractionService
         );
     }
 
     @Test
     void shouldCreateDocument() {
-        DocumentCreateRequest request = new DocumentCreateRequest();
+        String email = "alex@example.com";
 
-        /*
-         * Falls dein DTO aktuell keine Setter besitzt,
-         * ergänzen wir diese gleich im nächsten Schritt.
-         */
+        DocumentCreateRequest request = new DocumentCreateRequest();
         request.setFilename("contract.pdf");
         request.setContentType("application/pdf");
         request.setSummary("Contract summary");
 
-        Document savedDocument = new Document();
-        savedDocument.setId(1L);
-        savedDocument.setFilename("contract.pdf");
-        savedDocument.setContentType("application/pdf");
-        savedDocument.setSummary("Contract summary");
+        User user = new User();
+        user.setEmail(email);
+        user.setPassword("password");
+        user.setRole(Role.USER);
+
+        when(userRepository.findByEmailIgnoreCase(email))
+                .thenReturn(Optional.of(user));
 
         when(documentRepository.save(any(Document.class)))
-                .thenReturn(savedDocument);
+                .thenAnswer(invocation -> {
+                    Document document = invocation.getArgument(0);
+                    document.setId(1L);
+                    return document;
+                });
 
         DocumentResponse response =
-                documentService.createDocument(request);
+                documentService.createDocument(request, email);
 
         assertEquals(1L, response.getId());
         assertEquals("contract.pdf", response.getFilename());
         assertEquals("application/pdf", response.getContentType());
         assertEquals("Contract summary", response.getSummary());
 
-        verify(documentRepository).save(any(Document.class));
+        verify(userRepository).findByEmailIgnoreCase(email);
+        verify(documentRepository).save(
+                org.mockito.ArgumentMatchers.argThat(document ->
+                        document.getOwner() == user
+                )
+        );
     }
 }
