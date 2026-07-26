@@ -95,10 +95,14 @@ public class AuthService {
 
     public LoginResponse refreshAccessToken(String refreshTokenValue) {
 
-        RefreshToken refreshToken =
-                refreshTokenService.verifyRefreshToken(refreshTokenValue);
+        RefreshToken newRefreshToken =
+                refreshTokenService.rotateRefreshToken(
+                        refreshTokenValue
+                );
 
-        String email = refreshToken.getUser().getEmail();
+        String email = newRefreshToken
+                .getUser()
+                .getEmail();
 
         var userDetails =
                 customUserDetailsService.loadUserByUsername(email);
@@ -108,7 +112,7 @@ public class AuthService {
 
         return new LoginResponse(
                 newAccessToken,
-                refreshToken.getToken(),
+                newRefreshToken.getToken(),
                 "Bearer",
                 3600
         );
