@@ -10,6 +10,7 @@ import com.alexpetro.eadp.dto.LoginRequest;
 import com.alexpetro.eadp.dto.LoginResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import com.alexpetro.eadp.dto.RefreshTokenRequest;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -34,6 +35,23 @@ public class AuthController {
             @Valid @RequestBody LoginRequest request
     ) {
         return authService.login(request);
+    }
+
+    @PostMapping("/refresh")
+    public LoginResponse refreshToken(
+            @Valid @RequestBody RefreshTokenRequest request
+    ) {
+        return authService.refreshAccessToken(
+                request.getRefreshToken()
+        );
+    }
+
+    @PostMapping("/logout")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void logout(
+            @Valid @RequestBody RefreshTokenRequest request
+    ) {
+        authService.logout(request.getRefreshToken());
     }
 
     @GetMapping("/me")

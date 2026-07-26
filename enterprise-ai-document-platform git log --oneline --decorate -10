@@ -1,0 +1,10 @@
+[33m4f57206[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m feat: restrict documents to their owners
+[33mfe4b865[m feat: add JWT authentication filter
+[33m91a536b[m feat: handle duplicate user registration
+[33m9a2ed59[m feat: handle duplicate user registration
+[33m556c8c6[m feat: add Spring Security configuration
+[33mf89dfa1[m test: add document service unit tests
+[33mf2145f0[m feat: add document pagination
+[33ma062391[m feat: add document search endpoint
+[33ma935702[m feat: add AI provider integration layer
+[33mec49955[m feat: add AI summary service abstraction

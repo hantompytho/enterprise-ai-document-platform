@@ -1,22 +1,18 @@
 package com.alexpetro.eadp.dto;
 
-public class LoginResponse {
+public class AuthResponse {
 
     private final String accessToken;
     private final String refreshToken;
     private final String tokenType;
-    private final long expiresIn;
 
-    public LoginResponse(
+    public AuthResponse(
             String accessToken,
-            String refreshToken,
-            String tokenType,
-            long expiresIn
+            String refreshToken
     ) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
-        this.tokenType = tokenType;
-        this.expiresIn = expiresIn;
+        this.tokenType = "Bearer";
     }
 
     public String getAccessToken() {
@@ -29,9 +25,5 @@ public class LoginResponse {
 
     public String getTokenType() {
         return tokenType;
-    }
-
-    public long getExpiresIn() {
-        return expiresIn;
     }
 }

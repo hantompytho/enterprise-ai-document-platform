@@ -139,6 +139,33 @@ public class DocumentService {
                 .map(this::mapToResponse);
     }
 
+    public Page<DocumentResponse> getAllDocumentsForAdmin(
+            int page,
+            int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        return documentRepository
+                .findAll(pageable)
+                .map(this::mapToResponse);
+    }
+
+    public DocumentResponse getDocumentByIdForAdmin(Long id) {
+        Document document = documentRepository
+                .findById(id)
+                .orElseThrow(() -> new DocumentNotFoundException(id));
+
+        return mapToResponse(document);
+    }
+
+    public void deleteDocumentForAdmin(Long id) {
+        Document document = documentRepository
+                .findById(id)
+                .orElseThrow(() -> new DocumentNotFoundException(id));
+
+        documentRepository.delete(document);
+    }
+
     private Document findDocumentByIdAndOwner(
             Long id,
             String email

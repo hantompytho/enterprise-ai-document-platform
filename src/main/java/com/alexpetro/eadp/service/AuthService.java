@@ -2,6 +2,7 @@ package com.alexpetro.eadp.service;
 
 import com.alexpetro.eadp.dto.RegisterRequest;
 import com.alexpetro.eadp.dto.UserResponse;
+import com.alexpetro.eadp.entity.RefreshToken;
 import com.alexpetro.eadp.entity.Role;
 import com.alexpetro.eadp.entity.User;
 import com.alexpetro.eadp.repository.UserRepository;
@@ -22,19 +23,22 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final CustomUserDetailsService customUserDetailsService;
     private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
 
     public AuthService(
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
             AuthenticationManager authenticationManager,
             CustomUserDetailsService customUserDetailsService,
-            JwtService jwtService
+            JwtService jwtService,
+            RefreshTokenService refreshTokenService
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.customUserDetailsService = customUserDetailsService;
         this.jwtService = jwtService;
+        this.refreshTokenService = refreshTokenService;
     }
 
     public UserResponse register(RegisterRequest request) {
@@ -43,7 +47,8 @@ public class AuthService {
                 .toLowerCase();
 
         if (userRepository.existsByEmailIgnoreCase(normalizedEmail)) {
-            throw new EmailAlreadyExistsException(normalizedEmail);        }
+            throw new EmailAlreadyExistsException(normalizedEmail);
+        }
 
         User user = new User();
         user.setEmail(normalizedEmail);
@@ -75,13 +80,42 @@ public class AuthService {
         var userDetails =
                 customUserDetailsService.loadUserByUsername(normalizedEmail);
 
-        String token = jwtService.generateToken(userDetails);
+        String accessToken = jwtService.generateToken(userDetails);
+
+        RefreshToken refreshToken =
+                refreshTokenService.createRefreshToken(normalizedEmail);
 
         return new LoginResponse(
-                token,
+                accessToken,
+                refreshToken.getToken(),
                 "Bearer",
                 3600
         );
+    }
+
+    public LoginResponse refreshAccessToken(String refreshTokenValue) {
+
+        RefreshToken refreshToken =
+                refreshTokenService.verifyRefreshToken(refreshTokenValue);
+
+        String email = refreshToken.getUser().getEmail();
+
+        var userDetails =
+                customUserDetailsService.loadUserByUsername(email);
+
+        String newAccessToken =
+                jwtService.generateToken(userDetails);
+
+        return new LoginResponse(
+                newAccessToken,
+                refreshToken.getToken(),
+                "Bearer",
+                3600
+        );
+    }
+
+    public void logout(String refreshTokenValue) {
+        refreshTokenService.deleteRefreshToken(refreshTokenValue);
     }
 
     public UserResponse getCurrentUser(String email) {
