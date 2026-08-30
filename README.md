@@ -1,42 +1,66 @@
 # Enterprise AI Document Platform
 
-Enterprise-style Spring Boot backend application for document management, REST APIs, PostgreSQL persistence and future AI-powered document summaries.
+A secure Spring Boot backend for document management with authentication, authorization, file processing, AI-ready summarization, and PostgreSQL persistence.
 
-## Project Goal
+## Features
 
-This project demonstrates a modern backend architecture using Java, Spring Boot, PostgreSQL, Docker and clean REST API design.
-
-The goal is to build a realistic business application similar to internal enterprise tools used for document management, automation and AI-assisted workflows.
-
-## Current Features
-
-- Health check endpoint
-- Document CRUD API
-- PostgreSQL database persistence
-- Docker Compose setup for local database
-- DTO-based request and response models
-- Validation using Jakarta Bean Validation
+- User registration and login
+- BCrypt password hashing
+- JWT access token authentication
+- Refresh tokens with rotation
+- Logout support
+- Role-based authorization
+- USER and ADMIN roles
+- Document ownership
+- Secure document CRUD operations
+- Multipart file upload
+- File storage in PostgreSQL
+- File download
+- Text extraction with Apache Tika
+- AI summary service abstraction
+- Document search
+- Pagination
 - Global exception handling
-- Clean layered architecture
+- Request validation
+- Swagger / OpenAPI documentation
+- Unit tests
+- Integration tests with Testcontainers
+- GitHub Actions CI
 
 ## Tech Stack
 
 - Java 21
 - Spring Boot
-- Spring Web
+- Spring Security
 - Spring Data JPA
+- Hibernate
 - PostgreSQL
-- Docker Compose
+- Docker
+- Testcontainers
+- Apache Tika
+- JWT
 - Maven
-- Jakarta Validation
+- Swagger / OpenAPI
 
 ## Architecture
 
 ```text
+Client
+  |
+  v
 Controller
-    ↓
+  |
+  v
 Service
-    ↓
+  |
+  +---- Authentication / Authorization
+  |
+  +---- Text Extraction
+  |
+  +---- AI Summary Service
+  |
+  v
 Repository
-    ↓
+  |
+  v
 PostgreSQL
