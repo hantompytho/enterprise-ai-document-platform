@@ -25,6 +25,9 @@ public class Document {
 
     private String contentType;
 
+    @Column(columnDefinition = "BYTEA")
+    private byte[] data;
+
     @Column(columnDefinition = "TEXT")
     private String summary;
 

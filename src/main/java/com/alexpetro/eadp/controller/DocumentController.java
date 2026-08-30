@@ -12,6 +12,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import java.io.IOException;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ContentDisposition;
+import com.alexpetro.eadp.entity.Document;
 
 @RestController
 @RequestMapping("/api/documents")
@@ -114,5 +117,31 @@ public class DocumentController {
                 page,
                 size
         );
+    }
+
+    @GetMapping("/{id}/download")
+    public ResponseEntity<byte[]> downloadDocument(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+
+        Document document = documentService.downloadDocument(
+                id,
+                authentication.getName()
+        );
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(
+                        document.getContentType()
+                ))
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        ContentDisposition
+                                .attachment()
+                                .filename(document.getFilename())
+                                .build()
+                                .toString()
+                )
+                .body(document.getData());
     }
 }

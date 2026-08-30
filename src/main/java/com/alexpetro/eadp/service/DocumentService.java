@@ -15,6 +15,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Set;
 
 @Service
@@ -107,7 +108,7 @@ public class DocumentService {
     public DocumentResponse uploadDocument(
             MultipartFile file,
             String email
-    ) {
+    ) throws IOException {
         validateFile(file);
 
         User owner = getUserByEmail(email);
@@ -118,6 +119,7 @@ public class DocumentService {
         Document document = new Document();
         document.setFilename(file.getOriginalFilename());
         document.setContentType(file.getContentType());
+        document.setData(file.getBytes());
         document.setSummary(summary);
         document.setOwner(owner);
 
@@ -206,5 +208,12 @@ public class DocumentService {
                 document.getSummary(),
                 document.getCreatedAt()
         );
+    }
+
+    public Document downloadDocument(
+            Long id,
+            String email
+    ) {
+        return findDocumentByIdAndOwner(id, email);
     }
 }
