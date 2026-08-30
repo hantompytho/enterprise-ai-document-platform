@@ -19,7 +19,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
+@SpringBootTest(properties = {
+        "jwt.secret=test-secret-key-for-integration-tests-at-least-32-characters"
+})
 @AutoConfigureMockMvc
 @Testcontainers
 class AuthDocumentIntegrationTest {
